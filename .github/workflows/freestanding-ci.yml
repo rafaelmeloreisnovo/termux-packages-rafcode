@@ -1,0 +1,43 @@
+name: Freestanding cascade exact-head (host + ARM32 + ARM64)
+on:
+  push:
+    branches:
+      - work/freestanding-risk-cascade-v1-20261031
+  pull_request:
+    paths:
+      - "include/**"
+      - "src/**"
+      - "tests/**"
+      - ".github/workflows/freestanding-ci.yml"
+permissions:
+  contents: read
+jobs:
+  cross-compile-and-falsify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact SHA (Node 24)
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify immutable source identity
+        env:
+          TARGET: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$TARGET"
+          sha256sum include/raf_cascade_v1.h src/raf_cascade_v1.c tests/test_cascade_v1.c
+      - name: Cross-compile no-libc objects and inspect ELF
+        run: |
+          set -eu
+          mkdir -p build
+          for target in x86_64-linux-gnu armv7a-linux-gnueabi aarch64-linux-gnu; do
+            clang --target="$target" -std=c11 -O2 -Wall -Wextra -Werror -ffreestanding -fno-builtin -fno-stack-protector -fno-unwind-tables -fno-asynchronous-unwind-tables -Iinclude -c src/raf_cascade_v1.c -o "build/$target.o"
+            test -z "$(nm -u "build/$target.o")"
+            readelf -h "build/$target.o" | grep -E 'Class:|Machine:'
+          done
+      - name: Run 22 scoped host assertions
+        run: |
+          cc -std=c11 -O2 -Wall -Wextra -Werror -Iinclude tests/test_cascade_v1.c build/x86_64-linux-gnu.o -o build/cascade-tests
+          ./build/cascade-tests
+          printf 'SCOPED_HOST_ASSERTIONS=22 PASS; claim_allowed=false\n'
