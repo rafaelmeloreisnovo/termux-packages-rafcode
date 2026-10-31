@@ -25,4 +25,4 @@ Source contract: `rafaelmeloreisnovo/termux-packagesMy@c56d34d330ff8ca621c93bbe8
 **Gate:** `SOURCE != ARTIFACT != EXECUTION != EVIDENCE != CLAIM`. `claim_allowed=false`.
 
 ## Reversibility
-The repository originally had no commits. `main` received one minimal README to enable PR review; all new source/CI files are confined to `work/freestanding-risk-cascade-v1-20261031`, with **no merge**. To roll back the experiment: close the draft PR or move the work branch after independent review, without deleting the minimal bootstrap.
+**Historical note (before 31 October 2026):** the repository was initialized with a minimal README and source/CI were developed on `work/freestanding-risk-cascade-v1-20261031`. **Current observation:** PR #1 has since been merged to `main@e9699f46308c199c06f675b56ee7295a7b61b05e`; the earlier 'no merge' state is superseded. See [SOURCE_TRUTH_20261031.md](SOURCE_TRUTH_20261031.md) for the exact source/evidence boundary. Rollback for this documentation correction: close the unmerged docs PR; rollback of any code merge would require separate authorization and provenance.
